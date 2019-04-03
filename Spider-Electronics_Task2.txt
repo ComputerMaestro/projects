@@ -1,0 +1,47 @@
+#include<avr/io.h>
+
+int flagTimer0 = 0;   //for time interval needed between each beep
+int flagTimer1 = 0;   //for switching between beep and silence
+
+/*Timer1 is for analog output to speaker and Timer0 is for delay between each beep of speaker*/
+int main()
+{
+  //Setting pin for analog output
+  DDRB = (1 << PORTB1);
+
+  //Inittialising Timer1 at FWM mode
+  TCCR1A = (1 << COM0A1)|(1 << WGM11);
+  TCCR1B = (1 << WGM12)|(1 << WGM13);
+  ICR1 = 12;    //Calculated for 1000Hz frequency
+  OCR1A = 6;    //For half to be high and half low
+  TCCR1B |= (1 << CS12)|(1 << CS10);    //1024 prescalar
+
+  //Initialising Timer0 at Normal mode
+  TCCR0A = 0;
+  TIMSK0 = (1 << TOIE0);    //Enabling Timer overflow interrupt enable
+  sei();    //Enabling Global interrupts in SREG
+  TCCR0B = (1 << CS02)|(1 << CS00);   //1024 prescalar
+  
+  while(1){}    //Main loop
+
+  return 0;
+}
+
+ISR(TIMER0_OVF_vect)    //Overflow interrupt for Timer0
+{
+  flagTimer0++;
+  if(flagTimer0 >= 3)   //For 50 miliseconds between each Beep
+  {
+    flagTimer0 = 0;
+    if(flagTimer1 == 1)   //For Beep
+    {
+      flagTimer1 = 0;
+      TCCR1B |= (1 << CS12)|(1 << CS10);
+    }
+    else if(flagTimer1 == 0)    //Silence
+    {
+      flagTimer1 = 1;
+      TCCR1B &= ~((1 << CS12)|(1 << CS10));
+    }
+  }
+}

@@ -1,0 +1,56 @@
+#include<avr/io.h>
+#include<avr/interrupt.h>
+
+int blinkingRate = 50;  //initial rate is one second
+int blinkingFactor = 0;  //sets threshold cycle for the led to toggle
+
+void setupExtInt()
+{
+  EICRA = (1 << ISC11)|(1 << ISC10)|(1 << ISC01)|(1 << ISC00);
+  EIMSK = (1 << INT1)|(1 << INT0);
+}
+
+int main()
+{
+  DDRB = (1 << PORTB4);
+  DDRD = 0x00;
+  
+  //initialising timer0
+  TCCR0A = 0b00000010;  //setting on CTC mode
+  OCR0A = 124; //calulated for 0.025 seconds
+  TIMSK0 = (1 << OCIE0A);  // enabling OCR0A interrupt
+  
+  //setup for external interrupts
+  setupExtInt();
+  
+  sei();   //enable global interrupts
+  
+  TCCR0B = (1 << CS02)|(1 << CS00);//setting 1024 prescalar
+  
+  while(1){}
+  return 0;
+}
+
+ISR(TIMER0_COMPA_vect)
+{
+  blinkingFactor++;
+  if(blinkingFactor >= blinkingRate)  //when the blinkingFcator reaches threshold value for blinking 
+  {
+    PORTB ^= (1 << PORTB4);
+    blinkingFactor = 0;
+  }
+}
+
+ISR(INT0_vect)
+{
+  blinkingRate -= 1;
+  if(blinkingRate < 0)
+  {
+    blinkingRate = 0;
+  }
+}
+
+ISR(INT1_vect)
+{
+  blinkingRate += 1;
+}

@@ -1,0 +1,43 @@
+#include<avr/io.h>
+
+//Pin number in decimal form for PORTD
+#define LED_pin1 4
+#define LED_pin2 8
+#define LED_pin3 16
+#define LED_pin4 32
+#define LED_pin5 64
+#define LED_pin6 128
+
+//Variables used
+int overflowCount = 0;    //For delay between switching
+int LED_pins[6] = {LED_pin1,LED_pin2,LED_pin3,LED_pin4,LED_pin5,LED_pin6};    //For changing on LED at every switch
+int pinOn = 0;    //LED_pins array index of on LED
+
+int main()
+{ 
+  //Declaring output pins for LEDs
+  DDRD = 0b11111100;
+  PORTD = LED_pin1;
+
+  //Initialising Timer0 for delay interval between LED switching
+  TCCR0A = 0;
+  TIMSK0 = (1 << TOIE0);
+  sei();
+  TCCR0B = (1 << CS02)|(1 << CS00);
+
+  //Main loop
+  while(1){}
+}
+
+//Interrupt vector for Timer0 overflow
+ISR(TIMER0_OVF_vect)
+{
+  overflowCount++;
+  if(overflowCount >= 6)
+  {
+    overflowCount = 0;
+    pinOn++;
+    if(pinOn > 5) pinOn = 0;
+    PORTD = LED_pins[pinOn];
+  }
+}

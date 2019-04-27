@@ -1,2 +1,2 @@
-# projects
-Small Presonal Projects
+## Projects
+Small Personal Projects

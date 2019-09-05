@@ -1,3 +1,6 @@
+"""
+MADALINE
+"""
 import numpy as np
 
 class MADALINE:
@@ -40,7 +43,6 @@ class MADALINE:
                     self.W1[np.repeat(q, self.W1.shape[1], axis=1)] += (learning_rate*(y-self.sum[q].reshape((-1, 1)))*(x.T)).reshape(-1)
                 else:
                     accuracy += 1
-                    print("h:", h[0, 0], " y:", y)
             print("Epoch: ", epoch+1)
             print("Accuracy:", (accuracy/len(data))*100)
 

@@ -1,3 +1,6 @@
+"""
+BACKPROP NN
+"""
 import numpy as np
 
 class BackpropNN:

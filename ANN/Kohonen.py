@@ -1,3 +1,6 @@
+"""
+KOHONEN
+"""
 import numpy as np
 
 class KohonenNN:
